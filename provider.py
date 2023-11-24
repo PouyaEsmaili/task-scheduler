@@ -42,7 +42,7 @@ class ProviderMeta(Provider):
 
 
 class ThirdPartyProvider(Provider):
-    def view(self, payload):
+    async def view(self, payload):
         if not self.is_available():
             raise Exception(f'Provider {self.name} rate limit exceeded')
         print(f'Received {payload} in {self.name}')

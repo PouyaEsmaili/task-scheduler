@@ -11,31 +11,42 @@ class Scheduler:
     third_party_providers: Dict[str, ThirdPartyProvider]
 
     def __init__(self, provider_options: List[Dict]):
+        self.providers = {}
+        self.third_party_providers = {}
+
+        probability_weight_sum = sum(map(lambda x: x['weight'], provider_options))
         for i, option in enumerate(provider_options):
             name = option['name']
             rate = option['rate']
-            provider = ProviderMeta(name, rate)
+            probability = option['weight'] / probability_weight_sum
+            provider = ProviderMeta(probability, name, rate)
             self.providers[name] = provider
             third_party_provider = ThirdPartyProvider(name, rate)
             self.third_party_providers[name] = third_party_provider
 
+
+    @property
+    def is_empty(self):
+        return all(map(lambda x: x.task_queue.empty(), self.providers.values()))
+
     def schedule(self, provider_name: str, payload: str, priority: int):
         task = Task(provider_name, payload, priority)
         provider = self.providers[provider_name]
-        provider.task_queue.put((priority, task))
+        provider.task_queue.put(task)
         if provider.is_available():
-            asyncio.run(self._run_task(provider))
+            asyncio.create_task(self._run_task(provider))
         else:
-            asyncio.run(self._scheduled_run_task(provider))
+            asyncio.create_task(self._scheduled_run_task(provider))
 
     async def _run_task(self, provider: ProviderMeta):
         task = provider.task_queue.get()
         third_party_provider = self.third_party_providers[provider.name]
-        provider.last_request_time = datetime.now()
         try:
             await third_party_provider.view(task.payload)
         except Exception as e:
             print(e)
+        finally:
+            provider.last_request_time = datetime.now()
 
     async def _scheduled_run_task(self, provider: ProviderMeta):
         while not provider.is_available():
