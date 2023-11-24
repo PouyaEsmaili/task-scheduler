@@ -34,6 +34,10 @@ async def read_input(stop_event: asyncio.Event, scheduler: Scheduler):
                 stop_event.set()
                 print('Stopping...')
                 break
+            elif line in scheduler.providers:
+                provider = scheduler.providers[line]
+                provider.is_active = not provider.is_active
+                print(f'Provider {provider.name} is {"active" if provider.is_active else "inactive"}')
             else:
                 print('Unknown command.')
         except asyncio.CancelledError:
