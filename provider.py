@@ -45,6 +45,9 @@ class ProviderMeta(Provider):
         self.task_queue = PriorityQueue()
         self.probability = probability
 
+    def min_execute_after(self):
+        return min(map(lambda x: x.execute_after, self.task_queue.queue))
+
 
 class ThirdPartyProvider(Provider):
     async def view(self, payload):

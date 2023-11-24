@@ -1,5 +1,6 @@
 import asyncio
 import random
+from datetime import datetime, timedelta
 
 from scheduler import Scheduler
 
@@ -22,7 +23,9 @@ class TaskGenerator:
                 weights=list(map(lambda x: x.probability, self.scheduler.providers.values()))
             )[0]
             priority = random.randint(1, 10)
-            self.scheduler.schedule(provider_name, f'payload_{index}', priority)
+            execute_after_seconds = random.expovariate(5)
+            execute_after = datetime.now() + timedelta(seconds=execute_after_seconds)
+            self.scheduler.schedule(provider_name, f'payload_{index}', priority, execute_after)
             index += 1
 
         while not self.scheduler.is_empty:
