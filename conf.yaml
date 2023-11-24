@@ -1,0 +1,9 @@
+providers:
+  - name: P1
+    rate: 0.1
+
+  - name: P2
+    rate: 0.2
+
+  - name: P3
+    rate: 0.05

@@ -33,10 +33,12 @@ class Provider:
 
 class ProviderMeta(Provider):
     task_queue: PriorityQueue
+    probability: float
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, probability, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.task_queue = PriorityQueue()
+        self.probability = probability
 
 
 class ThirdPartyProvider(Provider):
